@@ -43,7 +43,9 @@ export default defineComponent({
       
       try {
         // Usar o ID como string ou number conforme recebido
+        console.log(this.id)
         this.produto = await this.produtosStore.buscarProdutoPorId(this.id)
+        this.produto = this.produto.data
       } catch (error: any) {
         this.error = error.message || 'Erro ao carregar produto'
         console.error('Erro ao carregar produto:', error)

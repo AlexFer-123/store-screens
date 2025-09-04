@@ -76,7 +76,9 @@ export const useProdutosStore = defineStore('produtos', {
       this.error = null
       
       try {
-        return await produtosService.buscarPorId(id)
+         const produto = await produtosService.buscarPorId(id)
+         return produto
+         
       } catch (error: any) {
         this.error = error.message || 'Erro ao buscar produto'
         console.error('Erro ao buscar produto:', error)

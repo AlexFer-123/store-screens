@@ -42,8 +42,8 @@ export default defineComponent({
       this.error = null
       
       try {
-        // Usar o ID como string ou number conforme recebido
         this.cliente = await this.clientesStore.buscarClientePorId(this.id)
+        this.cliente = this.cliente.data
       } catch (error: any) {
         this.error = error.message || 'Erro ao carregar cliente'
         console.error('Erro ao carregar cliente:', error)
@@ -64,7 +64,6 @@ export default defineComponent({
     
     formatPhone(phone: string): string {
       if (!phone) return ''
-      // Simple phone formatting for Brazilian numbers
       const cleaned = phone.replace(/\D/g, '')
       if (cleaned.length === 11) {
         return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7)}`
