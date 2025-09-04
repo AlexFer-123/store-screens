@@ -50,7 +50,7 @@ export const useProdutosStore = defineStore('produtos', {
       }
     },
 
-    async cadastrarProduto(produto: Omit<Produto, 'id' | 'createdAt' | 'updatedAt'>) {
+    async cadastrarProduto(produto: Omit<Produto, 'id' | 'created' | 'updatedAt'>) {
       this.loading = true
       this.error = null
       
@@ -82,6 +82,26 @@ export const useProdutosStore = defineStore('produtos', {
       } catch (error: any) {
         this.error = error.message || 'Erro ao buscar produto'
         console.error('Erro ao buscar produto:', error)
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async atualizarProduto(id: string | number, produtoAtualizado: Omit<Produto, 'id'>) {
+      this.loading = true
+      this.error = null
+      
+      try {
+        const produto = await produtosService.atualizar(id, produtoAtualizado)
+        const index = this.produtos.findIndex(p => p.id == id)
+        if (index !== -1) {
+          this.produtos[index] = produto
+        }
+        return produto
+      } catch (error: any) {
+        this.error = error.message || 'Erro ao atualizar produto'
+        console.error('Erro ao atualizar produto:', error)
         throw error
       } finally {
         this.loading = false

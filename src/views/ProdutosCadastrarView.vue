@@ -77,7 +77,7 @@ export default defineComponent({
       this.submitting = true
       
       try {
-        const produto: Omit<Produto, 'id' | 'createdAt' | 'updatedAt'> = {
+        const produto: Omit<Produto, 'id' | 'created' | 'updatedAt'> = {
           nome: this.form.nome.trim(),
           descricao: this.form.descricao.trim() || undefined,
           preco: parseFloat(this.form.preco),

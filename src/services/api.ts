@@ -37,9 +37,15 @@ export const produtosService = {
     return response.data.product || response.data
   },
 
-  async cadastrar(produto: Omit<Produto, 'id' | 'createdAt' | 'updatedAt'>): Promise<Produto> {
+  async cadastrar(produto: Omit<Produto, 'id' | 'created' | 'updatedAt'>): Promise<Produto> {
     const response = await api.post('/produtos', produto)
     return response.data.product || response.data
+  },
+
+  async atualizar(id: string | number, produto: Omit<Produto, 'id'>): Promise<Produto> {
+    const response = await api.put(`/produtos/${id}`, produto)
+    const { data } = response.data
+    return data.product || data.produto || data
   },
 
   async deletar(id: string | number): Promise<void> {
@@ -75,9 +81,15 @@ export const clientesService = {
     return response.data.client || response.data.cliente || response.data
   },
 
-  async cadastrar(cliente: Omit<Cliente, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cliente> {
+  async cadastrar(cliente: Omit<Cliente, 'id' | 'created' | 'updatedAt'>): Promise<Cliente> {
     const response = await api.post('/clientes', cliente)
     return response.data.client || response.data.cliente || response.data
+  },
+
+  async update(id: string | number, cliente: Omit<Cliente, 'id' >): Promise<Cliente> {
+    const response = await api.put(`/clientes/${id}`, cliente)
+    const { data } = response.data
+    return data.client || data.cliente || data
   },
 
   async deletar(id: string | number): Promise<void> {

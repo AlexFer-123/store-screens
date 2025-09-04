@@ -6,7 +6,7 @@ export interface Produto {
   categoria?: string
   estoque?: number
   data_criacao?: string
-  createdAt?: string
+  created?: string
   updatedAt?: string
 }
 
@@ -17,7 +17,7 @@ export interface Cliente {
   telefone?: string
   endereco?: string
   data_criacao?: string
-  createdAt?: string
+  created?: string
   updatedAt?: string
 }
 

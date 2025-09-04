@@ -76,7 +76,7 @@ export default defineComponent({
       this.submitting = true
       
       try {
-        const cliente: Omit<Cliente, 'id' | 'createdAt' | 'updatedAt'> = {
+        const cliente: Omit<Cliente, 'id' | 'created' | 'updatedAt'> = {
           nome: this.form.nome.trim(),
           email: this.form.email.trim(),
           telefone: this.form.telefone.trim() || undefined,
@@ -85,10 +85,8 @@ export default defineComponent({
         
         await this.clientesStore.cadastrarCliente(cliente)
         
-        // Redirect to clients list on success
         this.$router.push('/clientes')
       } catch (error) {
-        // Error is handled by the store
         console.error('Erro ao cadastrar cliente:', error)
       } finally {
         this.submitting = false

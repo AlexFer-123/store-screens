@@ -49,7 +49,7 @@ export const useClientesStore = defineStore('clientes', {
       }
     },
 
-    async cadastrarCliente(cliente: Omit<Cliente, 'id' | 'createdAt' | 'updatedAt'>) {
+    async cadastrarCliente(cliente: Omit<Cliente, 'id' | 'created' | 'updatedAt'>) {
       this.loading = true
       this.error = null
       
@@ -80,6 +80,26 @@ export const useClientesStore = defineStore('clientes', {
       } catch (error: any) {
         this.error = error.message || 'Erro ao buscar cliente'
         console.error('Erro ao buscar cliente:', error)
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async updateCliente(id: string | number, clienteAtualizado: Omit<Cliente, 'id' | 'created' | 'updatedAt'>) {
+      this.loading = true
+      this.error = null
+      
+      try {
+        const cliente = await clientesService.update(id, clienteAtualizado)
+        const index = this.clientes.findIndex(c => c.id == id)
+        if (index !== -1) {
+          this.clientes[index] = cliente
+        }
+        return cliente
+      } catch (error: any) {
+        this.error = error.message || 'Erro ao update cliente'
+        console.error('Erro ao update cliente:', error)
         throw error
       } finally {
         this.loading = false

@@ -3,7 +3,7 @@ import { defineComponent } from 'vue'
 import { useProdutosStore } from '@/stores/produtos'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ConfirmModal } from '@/components/ui/modal'
+import { ConfirmModal, UpdateModalProduct } from '@/components/ui/modal'
 import type { Produto } from '@/types'
 
 export default defineComponent({
@@ -15,7 +15,8 @@ export default defineComponent({
     CardHeader,
     CardTitle,
     Button,
-    ConfirmModal
+    ConfirmModal,
+    UpdateModalProduct
   },
   props: {
     id: {
@@ -29,7 +30,8 @@ export default defineComponent({
       loading: false,
       error: null as string | null,
       deleting: false,
-      showDeleteModal: false
+      showDeleteModal: false,
+      showUpdateModal: false
     }
   },
   computed: {
@@ -46,10 +48,18 @@ export default defineComponent({
       this.error = null
       
       try {
-        // Usar o ID como string ou number conforme recebido
-        console.log(this.id)
-        this.produto = await this.produtosStore.buscarProdutoPorId(this.id)
-        this.produto = this.produto.data
+        console.log('Carregando produto ID:', this.id)
+        const response = await this.produtosStore.buscarProdutoPorId(this.id)
+        console.log('Response loadProduto:', response)
+        
+        // Verificar se a resposta tem estrutura de data ou é direta
+        if (response && response.data) {
+          this.produto = response.data
+        } else {
+          this.produto = response
+        }
+        
+        console.log('Produto carregado:', this.produto)
       } catch (error: any) {
         this.error = error.message || 'Erro ao carregar produto'
         console.error('Erro ao carregar produto:', error)
@@ -83,6 +93,10 @@ export default defineComponent({
       this.showDeleteModal = true
     },
     
+    openUpdateModal() {
+      this.showUpdateModal = true
+    },
+    
     async confirmDelete() {
       if (!this.produto?.id) return
       
@@ -103,6 +117,38 @@ export default defineComponent({
     
     cancelDelete() {
       this.showDeleteModal = false
+    },
+    
+    async handleUpdateSuccess(produtoAtualizado?: Produto) {
+      this.showUpdateModal = false
+      
+      try {
+        if (produtoAtualizado) {
+          // Se recebeu dados atualizados do modal, usar diretamente
+          this.produto = produtoAtualizado
+          console.log('Produto atualizado recebido do modal:', this.produto)
+        } else {
+          // Tentar buscar dados atualizados do store primeiro (mais eficiente)
+          const produtoDoStore = this.produtosStore.produtos.find(p => p.id == this.id)
+          if (produtoDoStore) {
+            this.produto = produtoDoStore
+            console.log('Produto atualizado do store:', this.produto)
+          } else {
+            // Se não encontrar no store, recarregar do servidor
+            console.log('Produto não encontrado no store, recarregando do servidor...')
+            await this.loadProduto()
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao atualizar produto na interface:', error)
+      }
+      
+      // Fallback: sempre recarregar dados do servidor para garantir sincronia
+      await this.loadProduto()
+    },
+    
+    handleUpdateCancel() {
+      this.showUpdateModal = false
     }
   }
 })
@@ -119,20 +165,35 @@ export default defineComponent({
         Voltar para Produtos
       </Button>
       
-      <Button 
-        v-if="produto" 
-        variant="destructive" 
-        size="sm"
-        @click="openDeleteModal"
-        :disabled="deleting"
-        class="text-white"
-      >
-        <svg v-if="!deleting" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-        </svg>
-        <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-        {{ deleting ? 'Deletando...' : 'Deletar' }}
-      </Button>
+      <div class="flex gap-2">
+        <Button 
+          v-if="produto" 
+          variant="outline" 
+          size="sm"
+          @click="openUpdateModal"
+          class="text-black"
+        >
+          <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          Editar
+        </Button>
+        
+        <Button 
+          v-if="produto" 
+          variant="destructive" 
+          size="sm"
+          @click="openDeleteModal"
+          :disabled="deleting"
+          class="text-white"
+        >
+          <svg v-if="!deleting" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+          {{ deleting ? 'Deletando...' : 'Deletar' }}
+        </Button>
+      </div>
     </div>
 
     <!-- Loading State -->
@@ -229,11 +290,11 @@ export default defineComponent({
             </CardTitle>
           </CardHeader>
           <CardContent class="space-y-4">
-            <div v-if="produto.createdAt">
+            <div v-if="produto.created">
               <div class="text-sm font-medium">Criado em</div>
-              <div class="text-sm text-muted-foreground">{{ formatDate(produto.createdAt) }}</div>
+              <div class="text-sm text-muted-foreground">{{ formatDate(produto.created) }}</div>
             </div>
-            <div v-if="produto.updatedAt && produto.updatedAt !== produto.createdAt">
+            <div v-if="produto.updatedAt && produto.updatedAt !== produto.created">
               <div class="text-sm font-medium">Última atualização</div>
               <div class="text-sm text-muted-foreground">{{ formatDate(produto.updatedAt) }}</div>
             </div>
@@ -271,6 +332,14 @@ export default defineComponent({
       :loading="deleting"
       @confirm="confirmDelete"
       @cancel="cancelDelete"
+    />
+
+    <!-- Modal de Edição -->
+    <UpdateModalProduct
+      v-model:open="showUpdateModal"
+      :produto="produto"
+      @success="handleUpdateSuccess"
+      @cancel="handleUpdateCancel"
     />
   </div>
 </template>
