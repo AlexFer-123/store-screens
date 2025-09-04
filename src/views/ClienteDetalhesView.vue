@@ -130,7 +130,7 @@ export default defineComponent({
       <!-- Main Info -->
       <Card>
         <CardHeader>
-          <div class="flex flex-col sm:flex-row items-start gap-4">
+          <div class="flex flex-col sm:flex-row items-center gap-4">
             <div class="flex-shrink-0">
               <div class="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center">
                 <span class="text-2xl font-bold text-primary">
