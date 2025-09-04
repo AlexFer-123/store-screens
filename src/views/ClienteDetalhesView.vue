@@ -3,6 +3,7 @@ import { defineComponent } from 'vue'
 import { useClientesStore } from '@/stores/clientes'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { ConfirmModal } from '@/components/ui/modal'
 import type { Cliente } from '@/types'
 
 export default defineComponent({
@@ -13,7 +14,8 @@ export default defineComponent({
     CardDescription,
     CardHeader,
     CardTitle,
-    Button
+    Button,
+    ConfirmModal
   },
   props: {
     id: {
@@ -26,7 +28,8 @@ export default defineComponent({
       cliente: null as Cliente | null,
       loading: false,
       error: null as string | null,
-      deleting: false
+      deleting: false,
+      showDeleteModal: false
     }
   },
   computed: {
@@ -91,23 +94,30 @@ export default defineComponent({
       }
     },
     
-    async deletarCliente() {
+    openDeleteModal() {
+      this.showDeleteModal = true
+    },
+    
+    async confirmDelete() {
       if (!this.cliente?.id) return
-      
-      const confirmar = window.confirm(`Tem certeza que deseja deletar o cliente "${this.cliente.nome}"?\n\nEsta ação não pode ser desfeita.`)
-      
-      if (!confirmar) return
       
       this.deleting = true
       
       try {
         await this.clientesStore.deletarCliente(this.cliente.id)
+        this.showDeleteModal = false
         this.$router.push('/clientes')
       } catch (error: any) {
+        this.showDeleteModal = false
+        // Aqui poderia usar outro modal para mostrar o erro, mas por simplicidade mantemos alert
         alert('Erro ao deletar cliente: ' + (error.message || 'Erro desconhecido'))
       } finally {
         this.deleting = false
       }
+    },
+    
+    cancelDelete() {
+      this.showDeleteModal = false
     }
   }
 })
@@ -128,7 +138,7 @@ export default defineComponent({
         v-if="cliente" 
         variant="destructive" 
         size="sm"
-        @click="deletarCliente"
+        @click="openDeleteModal"
         :disabled="deleting"
         class="text-white"
       >
@@ -285,5 +295,18 @@ export default defineComponent({
         </CardContent>
       </Card>
     </div>
+
+    <!-- Modal de Confirmação -->
+    <ConfirmModal
+      v-model:open="showDeleteModal"
+      title="Deletar Cliente"
+      :description="`Tem certeza que deseja deletar o cliente '${cliente?.nome}'?\n\nEsta ação não pode ser desfeita e todos os dados relacionados serão perdidos permanentemente.`"
+      confirm-text="Deletar Cliente"
+      cancel-text="Cancelar"
+      variant="destructive"
+      :loading="deleting"
+      @confirm="confirmDelete"
+      @cancel="cancelDelete"
+    />
   </div>
 </template>

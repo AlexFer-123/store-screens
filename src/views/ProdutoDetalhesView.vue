@@ -3,6 +3,7 @@ import { defineComponent } from 'vue'
 import { useProdutosStore } from '@/stores/produtos'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { ConfirmModal } from '@/components/ui/modal'
 import type { Produto } from '@/types'
 
 export default defineComponent({
@@ -13,7 +14,8 @@ export default defineComponent({
     CardDescription,
     CardHeader,
     CardTitle,
-    Button
+    Button,
+    ConfirmModal
   },
   props: {
     id: {
@@ -26,7 +28,8 @@ export default defineComponent({
       produto: null as Produto | null,
       loading: false,
       error: null as string | null,
-      deleting: false
+      deleting: false,
+      showDeleteModal: false
     }
   },
   computed: {
@@ -76,23 +79,30 @@ export default defineComponent({
       this.$router.push('/produtos')
     },
     
-    async deletarProduto() {
+    openDeleteModal() {
+      this.showDeleteModal = true
+    },
+    
+    async confirmDelete() {
       if (!this.produto?.id) return
-      
-      const confirmar = window.confirm(`Tem certeza que deseja deletar o produto "${this.produto.nome}"?\n\nEsta ação não pode ser desfeita.`)
-      
-      if (!confirmar) return
       
       this.deleting = true
       
       try {
         await this.produtosStore.deletarProduto(this.produto.id)
+        this.showDeleteModal = false
         this.$router.push('/produtos')
       } catch (error: any) {
+        this.showDeleteModal = false
+        // Aqui poderia usar outro modal para mostrar o erro, mas por simplicidade mantemos alert
         alert('Erro ao deletar produto: ' + (error.message || 'Erro desconhecido'))
       } finally {
         this.deleting = false
       }
+    },
+    
+    cancelDelete() {
+      this.showDeleteModal = false
     }
   }
 })
@@ -113,7 +123,7 @@ export default defineComponent({
         v-if="produto" 
         variant="destructive" 
         size="sm"
-        @click="deletarProduto"
+        @click="openDeleteModal"
         :disabled="deleting"
         class="text-white"
       >
@@ -249,5 +259,18 @@ export default defineComponent({
         </CardContent>
       </Card>
     </div>
+
+    <!-- Modal de Confirmação -->
+    <ConfirmModal
+      v-model:open="showDeleteModal"
+      title="Deletar Produto"
+      :description="`Tem certeza que deseja deletar o produto '${produto?.nome}'?\n\nEsta ação não pode ser desfeita e todos os dados relacionados serão perdidos permanentemente.`"
+      confirm-text="Deletar Produto"
+      cancel-text="Cancelar"
+      variant="destructive"
+      :loading="deleting"
+      @confirm="confirmDelete"
+      @cancel="cancelDelete"
+    />
   </div>
 </template>
