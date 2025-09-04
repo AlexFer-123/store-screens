@@ -86,6 +86,25 @@ export const useClientesStore = defineStore('clientes', {
       }
     },
 
+    async deletarCliente(id: number) {
+      this.loading = true
+      this.error = null
+      
+      try {
+        await clientesService.deletar(id)
+        // Remove o cliente da lista local
+        this.clientes = this.clientes.filter(cliente => cliente.id !== id)
+        this.total -= 1
+        return true
+      } catch (error: any) {
+        this.error = error.message || 'Erro ao deletar cliente'
+        console.error('Erro ao deletar cliente:', error)
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
     clearError() {
       this.error = null
     }

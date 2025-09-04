@@ -88,6 +88,25 @@ export const useProdutosStore = defineStore('produtos', {
       }
     },
 
+    async deletarProduto(id: number) {
+      this.loading = true
+      this.error = null
+      
+      try {
+        await produtosService.deletar(id)
+        // Remove o produto da lista local
+        this.produtos = this.produtos.filter(produto => produto.id !== id)
+        this.total -= 1
+        return true
+      } catch (error: any) {
+        this.error = error.message || 'Erro ao deletar produto'
+        console.error('Erro ao deletar produto:', error)
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
     clearError() {
       this.error = null
     }

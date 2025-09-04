@@ -40,6 +40,10 @@ export const produtosService = {
   async cadastrar(produto: Omit<Produto, 'id' | 'createdAt' | 'updatedAt'>): Promise<Produto> {
     const response = await api.post('/produtos', produto)
     return response.data.product || response.data
+  },
+
+  async deletar(id: string | number): Promise<void> {
+    await api.delete(`/produtos/${id}`)
   }
 }
 
@@ -74,6 +78,10 @@ export const clientesService = {
   async cadastrar(cliente: Omit<Cliente, 'id' | 'createdAt' | 'updatedAt'>): Promise<Cliente> {
     const response = await api.post('/clientes', cliente)
     return response.data.client || response.data.cliente || response.data
+  },
+
+  async deletar(id: string | number): Promise<void> {
+    await api.delete(`/clientes/${id}`)
   }
 }
 
