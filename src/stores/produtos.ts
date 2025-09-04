@@ -56,7 +56,6 @@ export const useProdutosStore = defineStore('produtos', {
       
       try {
         const novoProduto = await produtosService.cadastrar(produto)
-        // Garantir que produtos é um array antes de usar unshift
         if (!Array.isArray(this.produtos)) {
           this.produtos = []
         }

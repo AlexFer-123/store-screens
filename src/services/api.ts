@@ -21,14 +21,14 @@ export const produtosService = {
     }
     
     const response = await api.get(`/produtos?${params}`)
-    
-    // Adaptando a resposta da API para o formato esperado
+    const { data } = response.data
+
     return {
-      data: response.data.products || [],
-      total: response.data.pagination?.total || 0,
-      page: response.data.pagination?.page || 1,
-      limit: response.data.pagination?.limit || 10,
-      totalPages: response.data.pagination?.pages || 1
+      data: data.products || [],
+      total: data.pagination?.total || 0,
+      page: data.pagination?.page || 1,
+      limit: data.pagination?.limit || 10,
+      totalPages: data.pagination?.pages || 1
     }
   },
 
