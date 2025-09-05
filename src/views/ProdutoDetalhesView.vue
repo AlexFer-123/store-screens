@@ -48,18 +48,14 @@ export default defineComponent({
       this.error = null
       
       try {
-        console.log('Carregando produto ID:', this.id)
         const response = await this.produtosStore.buscarProdutoPorId(this.id)
-        console.log('Response loadProduto:', response)
         
-        // Verificar se a resposta tem estrutura de data ou é direta
         if (response && response.data) {
           this.produto = response.data
         } else {
           this.produto = response
         }
         
-        console.log('Produto carregado:', this.produto)
       } catch (error: any) {
         this.error = error.message || 'Erro ao carregar produto'
         console.error('Erro ao carregar produto:', error)

@@ -36,7 +36,6 @@ export const useProdutosStore = defineStore('produtos', {
       
       try {
         const response: PaginatedResponse<Produto> = await produtosService.listar(page, limit, search)
-        console.log(response)
         this.produtos = response.data
         this.currentPage = response.page
         this.totalPages = response.totalPages

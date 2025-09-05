@@ -23,7 +23,6 @@ export default defineComponent({
     TableHead,
     TableHeader,
     TableRow
-    // Pagination
   },
   data() {
     return {
@@ -36,7 +35,6 @@ export default defineComponent({
       return useProdutosStore()
     },
     produtos(): Produto[] {
-      console.log(this.produtosStore.produtos)
       return this.produtosStore.produtos
     },
     loading(): boolean {
